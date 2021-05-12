@@ -5,10 +5,10 @@
 package variadic
 
 import (
+	"math"
+	"reflect"
 	"testing"
 	"unsafe"
-	"reflect"
-	"math"
 )
 
 func TestIntArg0(t *testing.T) {
@@ -31,7 +31,7 @@ func TestArgN(t *testing.T) {
 		}
 		fc.Words[0] = uintptr(n)
 		fc.Words[n] = uintptr(0xdead + n)
-		fc.NumArgs = n+1
+		fc.NumArgs = n + 1
 		ret := fc.Call()
 		if ret != fc.Words[n] {
 			t.Fatalf("got 0x%x; expected 0x%x", ret, fc.Words[n])

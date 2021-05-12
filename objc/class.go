@@ -185,7 +185,7 @@ func NewClassFromStruct(value interface{}) Class {
 	}
 
 	// Register the IBOutlet setters.
-	for setterSelector, _ := range setters {
+	for setterSelector := range setters {
 		sel := selectorWithName(setterSelector)
 		typeInfo := encVoid + encId + encSelector + encId
 		C.GoObjc_ClassAddMethod(ptr, sel, methodCallTarget(), C.CString(typeInfo))

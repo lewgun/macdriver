@@ -27,9 +27,9 @@ import "C"
 import "unsafe"
 
 type FunctionCall struct {
-	Words      [12]uintptr
-	NumArgs    int
-	addr       unsafe.Pointer
+	Words   [12]uintptr
+	NumArgs int
+	addr    unsafe.Pointer
 }
 
 // NewFunctionCall creates a new FunctionCall than can be
@@ -61,7 +61,7 @@ func (f *FunctionCall) Call() uintptr {
 	if f.NumArgs > len(f.Words) {
 		panic("bad NumArgs")
 	}
-	
+
 	if f.addr == nil {
 		panic("variadic: Call called with nil function addr")
 	}

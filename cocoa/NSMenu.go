@@ -42,3 +42,18 @@ func (menu NSMenu) SetAutoenablesItems(b bool) {
 func (menu NSMenu) AutoenablesItems() bool {
 	return menu.Get("autoenablesItems").Bool()
 }
+
+func (menu NSMenu) ItemArray() []NSMenuItem {
+	obj := menu.Get("itemArray")
+	a := core.NSArray{obj}
+	count := int(a.Count())
+	items := make([]NSMenuItem, count)
+	for i := 0; i < count; i++ {
+		o := a.ObjectAtIndex(uint64(i))
+		items[i] = NSMenuItem{o}
+	}
+	return items
+}
+func (menu NSMenu) NumberOfItems() uint64 {
+	return menu.Get("numberOfItems").Uint()
+}

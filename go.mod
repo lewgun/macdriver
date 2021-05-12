@@ -1,3 +1,3 @@
-module github.com/progrium/macdriver
+module github.com/lewgun/macdriver
 
 go 1.15
