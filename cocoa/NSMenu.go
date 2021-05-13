@@ -59,5 +59,5 @@ func (menu NSMenu) NumberOfItems() uint64 {
 }
 
 func (menu NSMenu) RemoveAllItems(){
-	menu.Send("removeAllItems:")
+	menu.Send("removeAllItems")
 }
