@@ -22,7 +22,7 @@ func NSAlert_New() NSAlert {
 //}
 
 func (i NSAlert) SetTitle(s string) {
-	i.Get("window").Send("setTitle:", core.String(title))
+	i.Get("window").Send("setTitle:", core.String(s))
 }
 
 func (i NSAlert) SetMessageText(s string) {
