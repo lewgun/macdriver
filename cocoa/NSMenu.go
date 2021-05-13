@@ -57,3 +57,7 @@ func (menu NSMenu) ItemArray() []NSMenuItem {
 func (menu NSMenu) NumberOfItems() uint64 {
 	return menu.Get("numberOfItems").Uint()
 }
+
+func (menu NSMenu) RemoveAllItems(){
+	menu.Send("removeAllItems:", item)
+}
