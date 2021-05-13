@@ -26,7 +26,7 @@ func (i NSAlert) SetTitle(s string) {
 }
 
 func (i NSAlert) SetMessageText(s string) {
-	i.Set("setMessageText:" ,core.String(s))
+	i.Send("setMessageText:" ,core.String(s))
 }
 
 
