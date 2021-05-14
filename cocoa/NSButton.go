@@ -1,8 +1,8 @@
 package cocoa
 
 import (
-	"github.com/lewgun/macdriver/objc"
 	"github.com/progrium/macdriver/core"
+	"github.com/progrium/macdriver/objc"
 )
 
 type NSButton struct {
