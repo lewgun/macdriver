@@ -64,5 +64,5 @@ func (i NSAlert) ShowsSuppressionButton(show bool) {
 }
 
 func (i NSAlert) SuppressionButton() NSButton {
-	return NSButton{i.Get("suppressionButton")}
+	return NSButton{NSView{i.Get("suppressionButton")}}
 }
