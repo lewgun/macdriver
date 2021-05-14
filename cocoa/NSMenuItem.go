@@ -145,7 +145,6 @@ func (i NSMenuItem) State() int64 {
 	return i.Get("state").Int()
 }
 
-
 // SetTag sets the tag of the menu item.
 //https://developer.apple.com/documentation/appkit/nsmenuitem/1514840-tag?language=objc
 func (i NSMenuItem) SetTag(tag int) {
