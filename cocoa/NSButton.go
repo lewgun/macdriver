@@ -17,7 +17,7 @@ func (i NSButton) SetTarget(obj objc.Object) {
 }
 
 func (i NSButton) SetAction(sel objc.Selector) {
-	i.Set("action:", obj)
+	i.Set("action:", sel)
 }
 
 func (i NSButton) Title() string {
