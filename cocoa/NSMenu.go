@@ -43,7 +43,8 @@ func (menu NSMenu) SetDelegate(delegate objc.Object) {
 
 func (menu NSMenu) ItemArray() []NSMenuItem {
 	obj := menu.Get("itemArray")
-	a := core.NSArray{obj}
+	a := core.NSArray_WithObjects(obj)
+
 	count := int(a.Count())
 	items := make([]NSMenuItem, count)
 	for i := 0; i < count; i++ {

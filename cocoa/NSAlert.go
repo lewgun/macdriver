@@ -45,7 +45,7 @@ func (i NSAlert) SetAlertStyle(style int) {
 }
 
 func (i NSAlert) Icon() NSImage {
-	return NSImage{i.Get("icon")}
+	return NSImage{gen_NSImage{i.Get("icon")}}
 }
 
 func (i NSAlert) SetIcon(obj NSImage) {
@@ -64,5 +64,12 @@ func (i NSAlert) ShowsSuppressionButton(show bool) {
 }
 
 func (i NSAlert) SuppressionButton() NSButton {
-	return NSButton{NSView{i.Get("suppressionButton")}}
+	return NSButton{
+		gen_NSButton{
+			NSControl{
+				gen_NSControl{
+					i.Get("suppressionButton"),
+				}},
+		},
+	}
 }
