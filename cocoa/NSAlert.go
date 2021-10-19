@@ -68,7 +68,11 @@ func (i NSAlert) SuppressionButton() NSButton {
 		gen_NSButton{
 			NSControl{
 				gen_NSControl{
-					i.Get("suppressionButton"),
+					NSView{
+						gen_NSView{
+							i.Get("suppressionButton"),
+						},
+					},
 				}},
 		},
 	}

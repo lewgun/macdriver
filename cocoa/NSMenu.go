@@ -49,7 +49,9 @@ func (menu NSMenu) ItemArray() []NSMenuItem {
 	items := make([]NSMenuItem, count)
 	for i := 0; i < count; i++ {
 		o := a.ObjectAtIndex(uint64(i))
-		items[i] = NSMenuItem{o}
+		items[i] = NSMenuItem{
+			gen_NSMenuItem{o},
+		}
 	}
 	return items
 }
