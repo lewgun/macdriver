@@ -1,15 +1,23 @@
 package cocoa
 
+/*
+#cgo CFLAGS: -x objective-c
+#cgo LDFLAGS: -lobjc -framework AppKit
+#include <AppKit/AppKit.h>
+*/
+import "C"
+
 type NSBackingStoreType uintptr
 
 const (
-	NSBorderlessWindowMask          = 0
-	NSTitledWindowMask              = 1 << 0
-	NSClosableWindowMask            = 1 << 1
-	NSMiniaturizableWindowMask      = 1 << 2
-	NSResizableWindowMask           = 1 << 3
-	NSTexturedBackgroundWindowMask  = 1 << 8
-	NSWindowStyleMaskFullScreen     = 1 << 14
+	NSBorderlessWindowMask         = 0
+	NSTitledWindowMask             = 1 << 0
+	NSClosableWindowMask           = 1 << 1
+	NSMiniaturizableWindowMask     = 1 << 2
+	NSResizableWindowMask          = 1 << 3
+	NSTexturedBackgroundWindowMask = 1 << 8
+	NSWindowStyleMaskFullScreen    = 1 << 14
+
 	NSFullSizeContentViewWindowMask = 32768
 
 	NSWindowTitleVisible = 0
@@ -23,8 +31,15 @@ const (
 	NSBackingStoreNonretained NSBackingStoreType = 1
 	NSBackingStoreBuffered    NSBackingStoreType = 2
 
-	NSFloatingWindowLevel = 3
-	NSMainMenuWindowLevel = 24
+	NSNormalWindowLevel      = C.NSNormalWindowLevel
+	NSFloatingWindowLevel    = C.NSFloatingWindowLevel
+	NSSubmenuWindowLevel     = C.NSSubmenuWindowLevel
+	NSTornOffMenuWindowLevel = C.NSTornOffMenuWindowLevel
+	NSMainMenuWindowLevel    = C.NSMainMenuWindowLevel
+	NSStatusWindowLevel      = C.NSStatusWindowLevel
+	NSModalPanelWindowLevel  = C.NSModalPanelWindowLevel
+	NSPopUpMenuWindowLevel   = C.NSPopUpMenuWindowLevel
+	NSScreenSaverWindowLevel = C.NSScreenSaverWindowLevel
 
 	NSWindowCollectionBehaviorDefault                   = 0
 	NSWindowCollectionBehaviorCanJoinAllSpaces          = 1 << 0
