@@ -22,6 +22,11 @@ func NSArray_WithObjects(objs ...objc.Object) NSArray {
 	return NSArray_fromRef(objc.Get("NSArray").Send("arrayWithObjects:", objsInterface...))
 }
 
+func NSArray_WithObject(obj objc.Object) NSArray {
+	return NSArray_fromRef(objc.Get("NSArray").Send("initWithArray:", obj))
+}
+
+
 // Count returns the number of objects in the array.
 // https://developer.apple.com/documentation/foundation/nsarray/1409982-count?language=objc
 func (a NSArray) Count() uint64 {
