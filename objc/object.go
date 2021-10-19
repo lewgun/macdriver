@@ -13,9 +13,19 @@ import (
 	"unsafe"
 )
 
+// A Ref represents an Objective-C object.
+// The basic interface only includes the address (aka ID) of the object.
+// For richer wrapper, use `Object`.
+type Ref interface {
+	// Pointer returns the in-memory address of the object.
+	Pointer() uintptr
+}
+
 // An Object represents an Objective-C object, along with
 // some convenience methods only found on NSObjects.
 type Object interface {
+	Ref
+
 	// SendMsg sends an arbitrary message to the method on the
 	// object that is identified by selectorName.
 	Send(selector string, args ...interface{}) Object
@@ -54,9 +64,6 @@ type Object interface {
 	// returns a Go string.
 	String() string
 
-	// Pointer returns the in-memory address of the object.
-	Pointer() uintptr
-
 	// Uint returns the value of the object as an uint64.
 	Uint() uint64
 
@@ -68,6 +75,9 @@ type Object interface {
 
 	// Bool returns the value of the object as a bool.
 	Bool() bool
+
+	// CString returns the value of the object as a C string.
+	CString() string
 
 	Set(setter string, args ...interface{})
 	Get(getter string) Object
@@ -83,6 +93,24 @@ type object struct {
 
 func ObjectPtr(ptr uintptr) Object {
 	return object{ptr: ptr}
+}
+
+func Object_fromPointer(id unsafe.Pointer) Object {
+	return ObjectPtr(uintptr(id))
+}
+
+func Object_fromRef(ref Ref) Object {
+	if ref == nil {
+		return nil
+	}
+	return ObjectPtr(ref.Pointer())
+}
+
+func RefPointer(o Ref) unsafe.Pointer {
+	if o == nil {
+		return nil
+	}
+	return unsafe.Pointer(o.Pointer())
 }
 
 // Pointer returns the object as a uintptr.
@@ -139,17 +167,24 @@ func (obj object) Set(setter string, args ...interface{}) {
 	obj.Send(fmt.Sprintf("set%s", strings.Title(setter)), args...)
 }
 
+func (obj object) CString() string {
+	if obj.Pointer() == 0 {
+		return ""
+	}
+
+	return C.GoString((*C.char)(unsafe.Pointer(obj.Pointer())))
+}
+
 func (obj object) String() string {
 	// TODO: some kind of recover to catch when this doesnt work
 
 	pool := GetClass("NSAutoreleasePool").Alloc().Init()
 	defer pool.Release()
 
-	descString := obj.Send("description")
-	utf8Bytes := descString.Send("UTF8String")
-	if utf8Bytes.Pointer() != 0 {
-		return C.GoString((*C.char)(unsafe.Pointer(utf8Bytes.Pointer())))
+	bytes := obj.Send("description").Send("UTF8String")
+	if bytes.Pointer() == 0 {
+		return "(nil)"
 	}
 
-	return "(nil)"
+	return bytes.CString()
 }

@@ -6,6 +6,7 @@ package objc
 
 /*
 #cgo LDFLAGS: -lobjc
+#include <stdlib.h>
 #include <objc/runtime.h>
 
 void *GoObjc_RegisterSelector(char *name) {
@@ -22,7 +23,10 @@ char *GoObjc_SelectorToString(void *sel) {
 }
 */
 import "C"
-import "unsafe"
+import (
+	"sync"
+	"unsafe"
+)
 
 // A Selector represents an Objective-C method selector.
 type Selector interface {
@@ -34,6 +38,11 @@ type Selector interface {
 	// It is only implemented to implement the Stringer
 	// interface.
 	String() string
+
+	// Objective-C address for the selector.
+	// NOTE: this could have used `Ref` for the address interface, though using a
+	// different method for the interface keeps them distinct from objects.
+	SelectorAddress() unsafe.Pointer
 }
 
 // Type selector is the underlying implementation
@@ -53,6 +62,10 @@ func (sel selector) String() string {
 	return sel.Selector()
 }
 
+func (sel selector) SelectorAddress() unsafe.Pointer {
+	return selectorWithName(sel.Selector())
+}
+
 // GetSelector looks up a Selector by name.
 func Sel(name string) Selector {
 	return selector(name)
@@ -67,22 +80,63 @@ func RegisterSelector(name string) unsafe.Pointer {
 	return selectorWithName(name)
 }
 
+func SelectorAt(p unsafe.Pointer) Selector {
+	return selector(stringFromSelector(p))
+}
+
+var selectors = struct {
+	sync.RWMutex
+	sel  map[string]unsafe.Pointer
+	name map[unsafe.Pointer]string
+}{
+	sel:  map[string]unsafe.Pointer{},
+	name: map[unsafe.Pointer]string{},
+}
+
 // selectorWithName looks up a selector by name.
 func selectorWithName(name string) unsafe.Pointer {
-	return C.GoObjc_RegisterSelector(C.CString(name))
+	selectors.RLock()
+	sel, ok := selectors.sel[name]
+	selectors.RUnlock()
+	if ok {
+		return sel
+	}
+
+	selectors.Lock()
+	defer selectors.Unlock()
+
+	sel, ok = selectors.sel[name]
+	if ok {
+		return sel
+	}
+
+	cstr := C.CString(name)
+	defer C.free(unsafe.Pointer(cstr))
+	sel = C.GoObjc_RegisterSelector(cstr)
+	selectors.name[sel], selectors.sel[name] = name, sel
+	return sel
 }
 
 // stringFromSelector converts a selector to a Go string
 func stringFromSelector(sel unsafe.Pointer) string {
-	return C.GoString(C.GoObjc_SelectorToString(sel))
-}
+	selectors.RLock()
+	name, ok := selectors.name[sel]
+	selectors.RUnlock()
+	if ok {
+		return name
+	}
 
-// typeInfoForMethod returns the type encoding string for
-// selector on obj's Class.
-func typeInfoForMethod(obj Object, selector string) string {
-	sel := selectorWithName(selector)
-	cls := getObjectClass(obj)
-	return C.GoString(C.GoObjc_TypeInfoForMethod(unsafe.Pointer(cls.Pointer()), sel))
+	selectors.Lock()
+	defer selectors.Unlock()
+
+	name, ok = selectors.name[sel]
+	if ok {
+		return name
+	}
+
+	name = C.GoString(C.GoObjc_SelectorToString(sel))
+	selectors.name[sel], selectors.sel[name] = name, sel
+	return name
 }
 
 // simplifyTypeInfo returns a simplified typeInfo representation
@@ -106,10 +160,37 @@ func simplifyTypeInfo(typeInfo string) string {
 	return string(sti)
 }
 
+var methodTypeInfo = struct {
+	sync.RWMutex
+	e map[[2]unsafe.Pointer]string
+}{
+	e: map[[2]unsafe.Pointer]string{},
+}
+
 // simpleTypeInfoForMethod fetches the type info for the method
 // identified by obj's class and the given selector and returns
 // it in a simplified form produced by the simplifyTypeInfo function.
-func simpleTypeInfoForMethod(obj Object, selector string) string {
-	ti := typeInfoForMethod(obj, selector)
-	return simplifyTypeInfo(ti)
+func simpleTypeInfoForMethod(obj Object, sel unsafe.Pointer) string {
+	cls := unsafe.Pointer(getObjectClass(obj).Pointer())
+	key := [2]unsafe.Pointer{cls, sel}
+
+	methodTypeInfo.RLock()
+	ti, ok := methodTypeInfo.e[key]
+	methodTypeInfo.RUnlock()
+	if ok {
+		return ti
+	}
+
+	methodTypeInfo.Lock()
+	defer methodTypeInfo.Unlock()
+
+	ti, ok = methodTypeInfo.e[key]
+	if ok {
+		return ti
+	}
+
+	ti = C.GoString(C.GoObjc_TypeInfoForMethod(cls, sel))
+	ti = simplifyTypeInfo(ti)
+	methodTypeInfo.e[key] = ti
+	return ti
 }
